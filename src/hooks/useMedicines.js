@@ -1,26 +1,20 @@
 import { useState, useEffect, useCallback } from 'react';
+import { supabase } from '../lib/supabase';
 import {
     getAllMedicines,
     addMedicine,
     updateMedicine,
     deleteMedicine,
-    searchMedicines,
-    getLowStockMedicines
+    searchMedicines
 } from '../db/db';
 
-/**
- * Custom Hook for Medicine Operations
- * Provides reactive access to medicine data with automatic refresh
- */
 export function useMedicines() {
     const [medicines, setMedicines] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // Fetch all medicines
     const fetchMedicines = useCallback(async () => {
-        setLoading(true);
-        setError(null);
+        // setLoading(true); // Don't set loading on every refresh to avoid flicker
         const result = await getAllMedicines();
         if (result.success) {
             setMedicines(result.data);
@@ -30,57 +24,35 @@ export function useMedicines() {
         setLoading(false);
     }, []);
 
-    // Initial fetch
     useEffect(() => {
         fetchMedicines();
+
+        // Realtime Subscription
+        const subscription = supabase
+            .channel('medicines_changes')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'medicines' }, (payload) => {
+                console.log('Real-time update:', payload);
+                fetchMedicines(); // Refresh list on any change
+            })
+            .subscribe();
+
+        return () => {
+            subscription.unsubscribe();
+        };
     }, [fetchMedicines]);
 
-    // Add medicine
-    const add = useCallback(async (medicine) => {
-        const result = await addMedicine(medicine);
-        if (result.success) {
-            await fetchMedicines();
-        }
-        return result;
-    }, [fetchMedicines]);
-
-    // Update medicine
-    const update = useCallback(async (id, updates) => {
-        const result = await updateMedicine(id, updates);
-        if (result.success) {
-            await fetchMedicines();
-        }
-        return result;
-    }, [fetchMedicines]);
-
-    // Delete medicine
-    const remove = useCallback(async (id) => {
-        const result = await deleteMedicine(id);
-        if (result.success) {
-            await fetchMedicines();
-        }
-        return result;
-    }, [fetchMedicines]);
-
-    // Search medicines
-    const search = useCallback(async (query) => {
-        if (!query.trim()) {
-            return fetchMedicines();
-        }
+    // Wrappers
+    const add = async (medicine) => addMedicine(medicine);
+    const update = async (id, updates) => updateMedicine(id, updates);
+    const remove = async (id) => deleteMedicine(id);
+    const search = async (query) => {
+        if (!query.trim()) return fetchMedicines();
         setLoading(true);
         const result = await searchMedicines(query);
-        if (result.success) {
-            setMedicines(result.data);
-        }
+        if (result.success) setMedicines(result.data);
         setLoading(false);
         return result;
-    }, [fetchMedicines]);
-
-    // Get low stock
-    const getLowStock = useCallback(async (threshold = 5) => {
-        const result = await getLowStockMedicines(threshold);
-        return result;
-    }, []);
+    };
 
     return {
         medicines,
@@ -90,7 +62,6 @@ export function useMedicines() {
         add,
         update,
         remove,
-        search,
-        getLowStock
+        search
     };
 }

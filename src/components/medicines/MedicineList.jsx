@@ -117,9 +117,9 @@ export default function MedicineList({ onEdit }) {
                 </div>
             </div>
 
-            {/* Medicine Table */}
+            {/* Medicine Table / Cards */}
             {filteredMedicines.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-16 text-slate-400">
+                <div className="flex flex-col items-center justify-center py-16 text-slate-400 glass-card">
                     <Package className="w-16 h-16 mb-4" />
                     <p className="text-lg font-medium">No medicines found</p>
                     <p className="text-sm mt-1">
@@ -127,119 +127,181 @@ export default function MedicineList({ onEdit }) {
                     </p>
                 </div>
             ) : (
-                <div className="overflow-x-auto rounded-xl border border-slate-200">
-                    <table className="w-full">
-                        <thead>
-                            <tr className="bg-slate-50 border-b border-slate-200">
-                                <th className="text-left px-6 py-4 font-semibold text-slate-600">Medicine</th>
-                                <th className="text-left px-6 py-4 font-semibold text-slate-600">Price</th>
-                                <th className="text-left px-6 py-4 font-semibold text-slate-600">Stock</th>
-                                <th className="text-left px-6 py-4 font-semibold text-slate-600">Expiry Date</th>
-                                <th className="text-center px-6 py-4 font-semibold text-slate-600">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filteredMedicines.map((medicine, index) => (
-                                <tr
-                                    key={medicine.id}
-                                    className={`table-row border-b border-slate-100 ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}`}
-                                >
-                                    {/* Medicine Name */}
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 bg-pharmacy-100 rounded-lg flex items-center justify-center">
-                                                <Pill className="w-5 h-5 text-pharmacy-600" />
+                <>
+                    {/* Desktop Table - Hidden on Mobile */}
+                    <div className="hidden md:block overflow-x-auto rounded-xl border border-slate-200 shadow-sm bg-white">
+                        <table className="w-full">
+                            <thead>
+                                <tr className="bg-slate-50 border-b border-slate-200">
+                                    <th className="text-left px-6 py-4 font-semibold text-slate-600">Medicine</th>
+                                    <th className="text-left px-6 py-4 font-semibold text-slate-600">Price</th>
+                                    <th className="text-left px-6 py-4 font-semibold text-slate-600">Stock</th>
+                                    <th className="text-left px-6 py-4 font-semibold text-slate-600">Expiry Date</th>
+                                    <th className="text-center px-6 py-4 font-semibold text-slate-600">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {filteredMedicines.map((medicine, index) => (
+                                    <tr
+                                        key={medicine.id}
+                                        className={`table-row border-b border-slate-100 ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'} hover:bg-slate-50 transition-colors`}
+                                    >
+                                        {/* Medicine Name */}
+                                        <td className="px-6 py-4">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-10 h-10 bg-pharmacy-100 rounded-lg flex items-center justify-center">
+                                                    <Pill className="w-5 h-5 text-pharmacy-600" />
+                                                </div>
+                                                <span className="font-medium text-slate-800 text-base">{medicine.name}</span>
                                             </div>
-                                            <span className="font-medium text-slate-800">{medicine.name}</span>
-                                        </div>
-                                    </td>
+                                        </td>
 
-                                    {/* Price */}
-                                    <td className="px-6 py-4">
-                                        <span className="font-semibold text-slate-800">
-                                            ${parseFloat(medicine.price).toFixed(2)}
-                                        </span>
-                                    </td>
+                                        {/* Price */}
+                                        <td className="px-6 py-4">
+                                            <span className="font-semibold text-slate-800 text-base">
+                                                ${parseFloat(medicine.price).toFixed(2)}
+                                            </span>
+                                        </td>
 
-                                    {/* Stock */}
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center gap-2">
-                                            <span className="font-medium text-slate-700">{medicine.quantity}</span>
-                                            {medicine.quantity < 5 ? (
-                                                <span className="badge-low-stock flex items-center gap-1">
-                                                    <AlertTriangle className="w-3 h-3" />
-                                                    Low Stock
-                                                </span>
-                                            ) : (
-                                                <span className="badge-in-stock">In Stock</span>
-                                            )}
-                                        </div>
-                                    </td>
+                                        {/* Stock */}
+                                        <td className="px-6 py-4">
+                                            <div className="flex items-center gap-2">
+                                                <span className="font-medium text-slate-700">{medicine.quantity}</span>
+                                                {medicine.quantity < 5 ? (
+                                                    <span className="badge-low-stock flex items-center gap-1">
+                                                        <AlertTriangle className="w-3 h-3" />
+                                                        Low Stock
+                                                    </span>
+                                                ) : (
+                                                    <span className="badge-in-stock">In Stock</span>
+                                                )}
+                                            </div>
+                                        </td>
 
-                                    {/* Expiry Date */}
-                                    <td className="px-6 py-4">
-                                        <span className={`font-medium ${isExpired(medicine.expiryDate)
+                                        {/* Expiry Date */}
+                                        <td className="px-6 py-4">
+                                            <span className={`font-medium ${isExpired(medicine.expiryDate)
                                                 ? 'text-red-600'
                                                 : isExpiringSoon(medicine.expiryDate)
                                                     ? 'text-amber-600'
                                                     : 'text-slate-700'
-                                            }`}>
-                                            {formatDate(medicine.expiryDate)}
-                                            {isExpired(medicine.expiryDate) && (
-                                                <span className="ml-2 text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full">
-                                                    Expired
-                                                </span>
-                                            )}
-                                            {isExpiringSoon(medicine.expiryDate) && !isExpired(medicine.expiryDate) && (
-                                                <span className="ml-2 text-xs bg-amber-100 text-amber-600 px-2 py-0.5 rounded-full">
-                                                    Expiring Soon
-                                                </span>
-                                            )}
-                                        </span>
-                                    </td>
+                                                }`}>
+                                                {formatDate(medicine.expiryDate)}
+                                                {isExpired(medicine.expiryDate) && (
+                                                    <span className="ml-2 text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full">
+                                                        Expired
+                                                    </span>
+                                                )}
+                                                {isExpiringSoon(medicine.expiryDate) && !isExpired(medicine.expiryDate) && (
+                                                    <span className="ml-2 text-xs bg-amber-100 text-amber-600 px-2 py-0.5 rounded-full">
+                                                        Expiring Soon
+                                                    </span>
+                                                )}
+                                            </span>
+                                        </td>
 
-                                    {/* Actions */}
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center justify-center gap-2">
-                                            <button
-                                                onClick={() => handleEdit(medicine)}
-                                                className="p-2 hover:bg-pharmacy-50 rounded-lg text-pharmacy-600 transition-colors"
-                                                title="Edit"
-                                            >
-                                                <Edit2 className="w-4 h-4" />
-                                            </button>
-
-                                            {deleteConfirm === medicine.id ? (
-                                                <div className="flex items-center gap-1">
-                                                    <button
-                                                        onClick={() => handleDelete(medicine.id)}
-                                                        className="px-2 py-1 bg-red-500 text-white text-xs rounded-lg hover:bg-red-600 transition-colors"
-                                                    >
-                                                        Confirm
-                                                    </button>
-                                                    <button
-                                                        onClick={() => setDeleteConfirm(null)}
-                                                        className="px-2 py-1 bg-slate-300 text-slate-700 text-xs rounded-lg hover:bg-slate-400 transition-colors"
-                                                    >
-                                                        Cancel
-                                                    </button>
-                                                </div>
-                                            ) : (
+                                        {/* Actions */}
+                                        <td className="px-6 py-4">
+                                            <div className="flex items-center justify-center gap-2">
                                                 <button
-                                                    onClick={() => setDeleteConfirm(medicine.id)}
-                                                    className="p-2 hover:bg-red-50 rounded-lg text-red-500 transition-colors"
-                                                    title="Delete"
+                                                    onClick={() => handleEdit(medicine)}
+                                                    className="p-2 hover:bg-pharmacy-50 rounded-lg text-pharmacy-600 transition-colors"
+                                                    title="Edit"
                                                 >
-                                                    <Trash2 className="w-4 h-4" />
+                                                    <Edit2 className="w-5 h-5" />
                                                 </button>
-                                            )}
+
+                                                {deleteConfirm === medicine.id ? (
+                                                    <div className="flex items-center gap-1 animate-fade-in">
+                                                        <button
+                                                            onClick={() => handleDelete(medicine.id)}
+                                                            className="px-3 py-1 bg-red-500 text-white text-xs font-bold rounded-lg hover:bg-red-600 transition-colors"
+                                                        >
+                                                            Confirm
+                                                        </button>
+                                                        <button
+                                                            onClick={() => setDeleteConfirm(null)}
+                                                            className="px-3 py-1 bg-slate-300 text-slate-700 text-xs font-bold rounded-lg hover:bg-slate-400 transition-colors"
+                                                        >
+                                                            Cancel
+                                                        </button>
+                                                    </div>
+                                                ) : (
+                                                    <button
+                                                        onClick={() => setDeleteConfirm(medicine.id)}
+                                                        className="p-2 hover:bg-red-50 rounded-lg text-red-500 transition-colors"
+                                                        title="Delete"
+                                                    >
+                                                        <Trash2 className="w-5 h-5" />
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {/* Mobile Card View - Visible on Mobile (< md) */}
+                    <div className="md:hidden space-y-4">
+                        {filteredMedicines.map((medicine) => (
+                            <div key={medicine.id} className="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                                <div className="flex justify-between items-start mb-3">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 bg-pharmacy-100 rounded-lg flex items-center justify-center">
+                                            <Pill className="w-5 h-5 text-pharmacy-600" />
                                         </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+                                        <div>
+                                            <p className="font-bold text-slate-800 text-lg">{medicine.name}</p>
+                                            <p className="text-slate-500 text-sm">
+                                                Expires: {formatDate(medicine.expiryDate)}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="font-bold text-slate-800 text-lg">
+                                            ${parseFloat(medicine.price).toFixed(2)}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center justify-between mt-4 pt-4 border-t border-slate-100">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-slate-600 font-medium">Stock: {medicine.quantity}</span>
+                                        {medicine.quantity < 5 && (
+                                            <span className="badge-low-stock px-2 py-0.5 text-xs">Low</span>
+                                        )}
+                                    </div>
+
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            onClick={() => handleEdit(medicine)}
+                                            className="p-2 bg-pharmacy-50 text-pharmacy-600 rounded-lg hover:bg-pharmacy-100 active:scale-95 transition-all"
+                                        >
+                                            <Edit2 className="w-5 h-5" />
+                                        </button>
+                                        {deleteConfirm === medicine.id ? (
+                                            <button
+                                                onClick={() => handleDelete(medicine.id)}
+                                                className="px-3 py-2 bg-red-500 text-white text-sm font-bold rounded-lg"
+                                            >
+                                                Confirm
+                                            </button>
+                                        ) : (
+                                            <button
+                                                onClick={() => setDeleteConfirm(medicine.id)}
+                                                className="p-2 bg-red-50 text-red-500 rounded-lg hover:bg-red-100 active:scale-95 transition-all"
+                                            >
+                                                <Trash2 className="w-5 h-5" />
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </>
             )}
 
             {/* Stats Footer */}

@@ -1,26 +1,45 @@
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AppProvider } from './context/AppContext';
+import { AuthProvider } from './context/AuthContext';
 import Layout from './components/layout/Layout';
+import Dashboard from './components/dashboard/Dashboard';
+import MedicineManager from './components/medicines/MedicineManager';
+import POSSystem from './components/sales/POSSystem';
+import Reports from './components/reports/Reports';
+import SettingsPage from './components/settings/SettingsPage';
+import LoginPage from './components/auth/LoginPage';
+import ProtectedRoute from './components/auth/ProtectedRoute';
+import AdminRoute from './components/auth/AdminRoute';
 import './index.css';
 
-/**
- * Pharmacy Management System
- * 
- * A modern React-based pharmacy management application using:
- * - React 18 with Functional Components & Hooks
- * - Tailwind CSS for styling
- * - IndexedDB (via Dexie.js) for client-side database
- * 
- * Features:
- * - Dashboard with real-time statistics
- * - Medicine inventory management (CRUD)
- * - Point of Sale system with transactional safety
- * - Reports and analytics
- */
 function App() {
   return (
-    <AppProvider>
-      <Layout />
-    </AppProvider>
+    <BrowserRouter>
+      <AppProvider>
+        <AuthProvider>
+          <Routes>
+            <Route path="/login" element={<LoginPage />} />
+
+            <Route element={<ProtectedRoute />}>
+              <Route element={<Layout />}>
+                <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/medicines" element={<MedicineManager />} />
+                <Route path="/sales" element={<POSSystem />} />
+
+                {/* Admin Only Routes */}
+                <Route element={<AdminRoute />}>
+                  <Route path="/reports" element={<Reports />} />
+                  <Route path="/settings" element={<SettingsPage />} />
+                </Route>
+              </Route>
+            </Route>
+
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </AuthProvider>
+      </AppProvider>
+    </BrowserRouter>
   );
 }
 

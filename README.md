@@ -1,130 +1,57 @@
-# Darusalaampharmcy 🏥
+# Darusalaampharmcy 🏥 (Production 2.0)
 
-A modern, offline-first web application for managing pharmacy inventory, sales, and analytics. Built with **React**, **Tailwind CSS**, and **IndexedDB** (via Dexie.js).
+A professional, cloud-connected Pharmacy Management System built for real-world usage.
 
-## 📚 Educational Foundation
-
-Before diving into the code, let's understand the core technology powering this application.
-
-### Why IndexedDB?
-We chose **IndexedDB** over LocalStorage for this project because a pharmacy system manages complex, structured data (thousands of medicines, sales records) that requires:
-1.  **Large Capacity**: IndexedDB can store hundreds of megabytes (vs LocalStorage's 5MB).
-2.  **Performance**: Operations are asynchronous (non-blocking), keeping the UI smooth.
-3.  **Complex Queries**: We need to search medicines by name and filter sales by date.
-4.  **Transactions**: Creating a sale must *simultaneously* deduct stock and record the transaction. If one fails, both must fail (ACID compliance).
-
-| Feature | LocalStorage | IndexedDB |
-|---------|--------------|-----------|
-| **Data Type** | Strings only | Objects, Files, Arrays |
-| **Capacity** | ~5MB | 50MB+ (Disk Quota) |
-| **Speed** | Synchronous (Slow) | Asynchronous (Fast) |
-| **Search** | No indexing | Full Indexing Support |
-
-### The CRUD Flow
-Data moves through the application in a unidirectional flow:
-1.  **User Input**: User fills the "Add Medicine" form.
-2.  **Validation**: React state validates inputs (e.g., price > 0).
-3.  **Database Call**: `db.medicines.add(data)` is called via our `db.js` wrapper.
-4.  **IndexedDB Transaction**: The browser commits the data to disk.
-5.  **UI Update**: The list component detects the change (via `useMedicines` hook) and re-renders.
+**Features:**
+- **Cloud Database (Supabase)**: Real-time data sync across all devices.
+- **Secure Authentication**: Admin & Staff login with role-based access.
+- **Advanced POS**: Sell inventory items + custom items (e.g. services).
+- **Offline Capable**: (Coming soon)
+- **Settings & Management**: Manage pharmacy profile and view team.
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Setup Guide
 
-### Prerequisites
-- Node.js (v16 or higher)
-- npm (v7 or higher)
+### 1. Prerequisites
+- Node.js installed.
+- A free account at [Supabase](https://supabase.com).
 
-### Installation
+### 2. Configure Database
+1.  Create a new project in Supabase.
+2.  Go to the **SQL Editor** in the Supabase Dashboard.
+3.  Copy the content of `supabase_schema.sql` (found in the project root or provided by developer) and run it.
+4.  This creates the tables (`medicines`, `sales`, etc.) and sets up security policies.
 
-1.  **Install dependencies**
-    ```bash
-    npm install
+### 3. Connect App
+1.  Rename `.env.local.example` to `.env.local` (if not already done).
+2.  Add your Supabase credentials:
+    ```
+    VITE_SUPABASE_URL=https://your-project.supabase.co
+    VITE_SUPABASE_ANON_KEY=your-anon-key
     ```
 
-2.  **Start the development server**
-    ```bash
-    npm run dev
-    ```
+### 4. Create First Admin
+1.  Go to **Authentication** -> **Users** in Supabase Dashboard.
+2.  Click "Add User" -> Create one (e.g., `admin@darusalaam.com`).
+3.  **Important**: Go to the `profiles` table in Supabase (Table Editor).
+4.  Find the row for this user and change the `role` from `staff` to `admin`.
 
-3.  Open your browser to `http://localhost:5173`
-
----
-
-## 🏗️ Project Architecture
-
-### Folder Structure
-```
-src/
-├── components/         # UI Components
-│   ├── dashboard/      # Stats & Overview
-│   ├── layout/         # Sidebar & Main Wrapper
-│   ├── medicines/      # Inventory Management
-│   ├── sales/          # POS System
-│   └── reports/        # Analytics
-├── context/            # Global State (AppProvider)
-├── db/                 # Database Layer (db.js)
-├── hooks/              # Custom Data Hooks
-└── index.css           # Global Styles & Tailwind
-```
-
-### Key Modules
-
-#### 1. Database Wrapper (`src/db/db.js`)
-We use **Dexie.js** to wrap IndexedDB. This allows us to write clean, promise-based code instead of complex event handling.
-```javascript
-// Example: Transactional Sale
-export async function createSale(medicineId, quantity) {
-  return db.transaction('rw', db.medicines, db.sales, async () => {
-    // 1. Get Medicine & Check Stock
-    // 2. Decuct Stock
-    // 3. Add Sale Record
-  });
-}
-```
-
-#### 2. Layout & State (`src/context/AppContext.jsx`)
-Manages global UI state like the current active page, toast notifications, and loading spinners. Prevents prop-drilling across the app.
-
-#### 3. Medicine Management
-- **MedicineForm**: Handles adding/editing with validation logic.
-- **MedicineList**: Displays inventory with "Low Stock" (< 5 units) indicators.
-
-#### 4. POS System
-A robust Point of Sale interface that:
-- Real-time search for medicines.
-- Validates stock before adding to cart.
-- Updates inventory and sales history in a single atomic transaction.
-
----
-
-## ⚠️ Error Handling
-
-Robust applications need to handle failures gracefully. We implemented:
-
-1.  **Database Connection**: If Dexie fails to open, catch blocks log errors to console.
-2.  **Stock Validation**: The POS prevents selling more items than available.
-3.  **User Feedback**: A custom **Toast Notification** system gives immediate feedback for success (Green), errors (Red), or warnings (Yellow).
-
-```javascript
-/* Example Error Handling in UI */
-try {
-  await sell(id, quantity);
-  showToast('Sale Success!', 'success');
-} catch (err) {
-  showToast(err.message, 'error'); // e.g., "Insufficient Stock"
-}
+### 5. Run the App
+```bash
+npm install
+npm run dev
 ```
 
 ---
 
-## 🛡️ Best Practices Used
-- **Custom Hooks**: Logic extracted into `useMedicines` and `useSales` for reusability.
-- **Component Composition**: Small, focused components (Sidebar, StatsCard, TableRow).
-- **Tailwind Utility Classes**: Rapid styling with a consistent design system (`text-slate-800`, `bg-pharmacy-500`).
-- **Semantic HTML**: Proper table structures and form labeling.
+## 🛡️ Security Roles
+- **Admin**: Full access. Can view Reports, Settings, and Manage Inventory.
+- **Staff**: POS access only. Can view inventory but not delete medicines. Cannot see Reports.
 
 ---
 
-*Built for the User by Antigravity AI*
+## 🛠️ Tech Stack
+- **Frontend**: React + Tailwind CSS
+- **Backend**: Supabase (PostgreSQL + Auth + Realtime)
+- **Deployment recommendation**: Vercel or Netlify.

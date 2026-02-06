@@ -7,4 +7,7 @@ if (!supabaseUrl || !supabaseAnonKey) {
     console.error('Missing Supabase environment variables. Please check .env.local')
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+// Prevent top-level crash if variables are missing
+export const supabase = (supabaseUrl && supabaseAnonKey)
+    ? createClient(supabaseUrl, supabaseAnonKey)
+    : null;

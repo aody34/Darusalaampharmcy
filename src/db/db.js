@@ -224,6 +224,37 @@ export async function getTodaysSales() {
     }
 }
 
+export async function getSalesByDateRange(startDate, endDate) {
+    try {
+        // Adjust endDate to include the full day if it's just a date string
+        const end = new Date(endDate);
+        end.setHours(23, 59, 59, 999);
+        const start = new Date(startDate);
+        start.setHours(0, 0, 0, 0);
+
+        const { data, error } = await supabase
+            .from('sales')
+            .select('*')
+            .gte('sale_date', start.toISOString())
+            .lte('sale_date', end.toISOString())
+            .order('sale_date', { ascending: false });
+
+        if (error) throw error;
+
+        const mappedData = data.map(s => ({
+            ...s,
+            medicineName: s.medicine_name,
+            quantitySold: s.quantity_sold,
+            totalPrice: s.total_price,
+            saleDate: s.sale_date
+        }));
+
+        return { success: true, data: mappedData };
+    } catch (error) {
+        return { success: false, error: error.message, data: [] };
+    }
+}
+
 // ==========================================
 // DASHBOARD STATS
 // ==========================================

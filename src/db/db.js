@@ -113,6 +113,41 @@ export async function deleteMedicine(id) {
     }
 }
 
+export async function searchMedicines(query) {
+    try {
+        const { data, error } = await supabase
+            .from('medicines')
+            .select(`
+                *,
+                supplier:suppliers (id, name)
+            `)
+            .or(`name.ilike.%${query}%,brand_name.ilike.%${query}%,generic_name.ilike.%${query}%`)
+            .order('name');
+
+        if (error) throw error;
+
+        const mappedData = data.map(m => ({
+            id: m.id,
+            name: m.name,
+            brandName: m.brand_name,
+            genericName: m.generic_name,
+            category: m.category,
+            batchNumber: m.batch_number,
+            purchasePrice: m.purchase_price,
+            sellingPrice: m.selling_price,
+            quantity: m.quantity,
+            expiryDate: m.expiry_date,
+            supplierId: m.supplier_id,
+            supplierName: m.supplier?.name
+        }));
+
+        return { success: true, data: mappedData };
+    } catch (error) {
+        console.error('Error searching medicines:', error);
+        return { success: false, error: error.message, data: [] };
+    }
+}
+
 // ==========================================
 // SUPPLIER OPERATIONS
 // ==========================================

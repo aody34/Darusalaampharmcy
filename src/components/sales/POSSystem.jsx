@@ -83,7 +83,7 @@ export default function POSSystem() {
         }
     };
 
-    const inventoryTotal = selectedMedicine ? selectedMedicine.price * quantity : 0;
+    const inventoryTotal = selectedMedicine ? selectedMedicine.sellingPrice * quantity : 0;
     const customTotal = customItem.price ? parseFloat(customItem.price) * customItem.quantity : 0;
     const currentTotal = mode === 'inventory' ? inventoryTotal : customTotal;
 
@@ -146,7 +146,7 @@ export default function POSSystem() {
                                                 className="w-full text-left px-4 py-3 hover:bg-slate-50 border-b border-slate-100"
                                             >
                                                 <p className="font-medium">{med.name}</p>
-                                                <p className="text-sm text-slate-500">${med.price} - Stock: {med.quantity}</p>
+                                                <p className="text-sm text-slate-500">${med.sellingPrice} - Stock: {med.quantity}</p>
                                             </button>
                                         ))}
                                     </div>
@@ -228,7 +228,19 @@ export default function POSSystem() {
                 <div className="glass-card p-6 bg-gradient-to-br from-pharmacy-900 to-pharmacy-800 text-white">
                     <h2 className="text-xl font-bold mb-4">Sale Summary</h2>
                     <p className="text-pharmacy-200 mb-8">Review the transaction details before confirming.</p>
-                    {/* Add real-time feed here later */}
+
+                    <div className="space-y-4">
+                        {selectedMedicine && (
+                            <div className="bg-white/10 p-4 rounded-xl">
+                                <h3 className="font-bold text-lg mb-2">{selectedMedicine.name}</h3>
+                                <div className="space-y-1 text-sm text-pharmacy-100">
+                                    <p>Brand: {selectedMedicine.brandName || 'N/A'}</p>
+                                    <p>Category: {selectedMedicine.category || 'General'}</p>
+                                    <p>Stock Remaining: {selectedMedicine.quantity - quantity}</p>
+                                </div>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>

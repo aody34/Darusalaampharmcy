@@ -7,7 +7,8 @@ import {
     LogOut,
     Heart,
     User,
-    X
+    X,
+    Truck
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -21,6 +22,7 @@ export default function Sidebar({ onClose }) {
         { id: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['admin', 'staff'] },
         { id: '/medicines', label: 'Medicines', icon: Pill, roles: ['admin', 'staff'] },
         { id: '/sales', label: 'Point of Sale', icon: ShoppingCart, roles: ['admin', 'staff'] },
+        { id: '/suppliers', label: 'Suppliers', icon: Truck, roles: ['admin'] },
         { id: '/reports', label: 'Reports', icon: BarChart3, roles: ['admin'] },
     ];
 

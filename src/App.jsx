@@ -10,6 +10,7 @@ import SettingsPage from './components/settings/SettingsPage';
 import LoginPage from './components/auth/LoginPage';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import AdminRoute from './components/auth/AdminRoute';
+import SupplierList from './components/suppliers/SupplierList';
 import './index.css';
 
 function App() {
@@ -30,6 +31,7 @@ function App() {
                 {/* Admin Only Routes */}
                 <Route element={<AdminRoute />}>
                   <Route path="/reports" element={<Reports />} />
+                  <Route path="/suppliers" element={<SupplierList />} />
                   <Route path="/settings" element={<SettingsPage />} />
                 </Route>
               </Route>

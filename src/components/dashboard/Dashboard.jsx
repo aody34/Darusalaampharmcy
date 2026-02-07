@@ -20,6 +20,7 @@ import { useApp } from '../../context/AppContext';
 export default function Dashboard() {
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const { navigateTo } = useApp();
 
     useEffect(() => {
@@ -28,9 +29,12 @@ export default function Dashboard() {
 
     const loadStats = async () => {
         setLoading(true);
+        setError(null);
         const result = await getDashboardStats();
         if (result.success) {
             setStats(result.data);
+        } else {
+            setError(result.error || 'Failed to load dashboard statistics');
         }
         setLoading(false);
     };
@@ -55,6 +59,24 @@ export default function Dashboard() {
         return (
             <div className="flex items-center justify-center h-96">
                 <div className="w-16 h-16 border-4 border-pharmacy-200 border-t-pharmacy-600 rounded-full animate-spin" />
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="flex flex-col items-center justify-center h-96 text-center">
+                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
+                    <AlertTriangle className="w-8 h-8 text-red-500" />
+                </div>
+                <h3 className="text-xl font-bold text-slate-800 mb-2">Failed to load dashboard</h3>
+                <p className="text-slate-500 mb-6 max-w-md">{error}</p>
+                <button
+                    onClick={loadStats}
+                    className="btn-primary"
+                >
+                    Try Again
+                </button>
             </div>
         );
     }
@@ -163,8 +185,8 @@ export default function Dashboard() {
                             </div>
                         </div>
                         <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg ${stats?.lowStockCount > 0
-                                ? 'bg-gradient-to-br from-red-500 to-red-600 shadow-red-500/30'
-                                : 'bg-gradient-to-br from-slate-400 to-slate-500 shadow-slate-400/30'
+                            ? 'bg-gradient-to-br from-red-500 to-red-600 shadow-red-500/30'
+                            : 'bg-gradient-to-br from-slate-400 to-slate-500 shadow-slate-400/30'
                             }`}>
                             <AlertTriangle className="w-7 h-7 text-white" />
                         </div>

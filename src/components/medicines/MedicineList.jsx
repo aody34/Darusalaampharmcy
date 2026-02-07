@@ -21,7 +21,14 @@ import {
  */
 export default function MedicineList({ onEdit }) {
     const { editMedicine, showToast } = useApp();
-    const { medicines, loading, remove, search, refresh } = useMedicines();
+    const { medicines, loading, error, remove, search, refresh } = useMedicines();
+
+    // Show toast on hook error if not handled appropriately elsewhere
+    useEffect(() => {
+        if (error) {
+            showToast(error, TOAST_TYPES.ERROR);
+        }
+    }, [error, showToast]);
 
     const [searchQuery, setSearchQuery] = useState('');
     const [filterStock, setFilterStock] = useState('all'); // all, low, in-stock
@@ -88,6 +95,17 @@ export default function MedicineList({ onEdit }) {
         return (
             <div className="flex items-center justify-center h-64">
                 <div className="w-12 h-12 border-4 border-pharmacy-200 border-t-pharmacy-600 rounded-full animate-spin" />
+            </div>
+        );
+    }
+
+    // Show error state if fetch failed
+    if (!medicines && !loading) {
+        // Fallback if medicines is null but not caught by error
+        return (
+            <div className="text-center py-12">
+                <p className="text-slate-500">No medicines data available.</p>
+                <button onClick={refresh} className="text-pharmacy-600 mt-2 hover:underline">Retry</button>
             </div>
         );
     }
@@ -211,7 +229,7 @@ export default function MedicineList({ onEdit }) {
                                         <td className="px-6 py-4">
                                             <div className="flex flex-col">
                                                 <span className={`text-sm font-medium ${isExpired(medicine.expiryDate) ? 'text-red-600' :
-                                                        isExpiringSoon(medicine.expiryDate) ? 'text-amber-600' : 'text-slate-600'
+                                                    isExpiringSoon(medicine.expiryDate) ? 'text-amber-600' : 'text-slate-600'
                                                     }`}>
                                                     {formatDate(medicine.expiryDate)}
                                                 </span>

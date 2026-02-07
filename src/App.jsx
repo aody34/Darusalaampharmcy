@@ -11,37 +11,40 @@ import LoginPage from './components/auth/LoginPage';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import AdminRoute from './components/auth/AdminRoute';
 import SupplierList from './components/suppliers/SupplierList';
+import ErrorBoundary from './components/common/ErrorBoundary';
 import './index.css';
 
 function App() {
   return (
-    <BrowserRouter>
-      <AppProvider>
-        <AuthProvider>
-          <Routes>
-            <Route path="/login" element={<LoginPage />} />
+    <ErrorBoundary>
+      <BrowserRouter>
+        <AppProvider>
+          <AuthProvider>
+            <Routes>
+              <Route path="/login" element={<LoginPage />} />
 
-            <Route element={<ProtectedRoute />}>
-              <Route element={<Layout />}>
-                <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/medicines" element={<MedicineManager />} />
-                <Route path="/sales" element={<POSSystem />} />
+              <Route element={<ProtectedRoute />}>
+                <Route element={<Layout />}>
+                  <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                  <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/medicines" element={<MedicineManager />} />
+                  <Route path="/sales" element={<POSSystem />} />
 
-                {/* Admin Only Routes */}
-                <Route element={<AdminRoute />}>
-                  <Route path="/reports" element={<Reports />} />
-                  <Route path="/suppliers" element={<SupplierList />} />
-                  <Route path="/settings" element={<SettingsPage />} />
+                  {/* Admin Only Routes */}
+                  <Route element={<AdminRoute />}>
+                    <Route path="/reports" element={<Reports />} />
+                    <Route path="/suppliers" element={<SupplierList />} />
+                    <Route path="/settings" element={<SettingsPage />} />
+                  </Route>
                 </Route>
               </Route>
-            </Route>
 
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </AuthProvider>
-      </AppProvider>
-    </BrowserRouter>
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </AuthProvider>
+        </AppProvider>
+      </BrowserRouter>
+    </ErrorBoundary>
   );
 }
 

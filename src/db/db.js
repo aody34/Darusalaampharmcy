@@ -10,6 +10,7 @@ import { supabase } from '../lib/supabase';
 // ==========================================
 
 export async function addMedicine(medicine) {
+    if (!supabase) return { success: false, error: 'Database connection not initialized' };
     try {
         const { data, error } = await supabase
             .from('medicines')
@@ -36,6 +37,7 @@ export async function addMedicine(medicine) {
 }
 
 export async function getAllMedicines() {
+    if (!supabase) return { success: false, error: 'Database connection not initialized' };
     try {
         // Now fetching supplier info as well
         const { data, error } = await supabase
@@ -72,6 +74,7 @@ export async function getAllMedicines() {
 }
 
 export async function updateMedicine(id, updates) {
+    if (!supabase) return { success: false, error: 'Database connection not initialized' };
     try {
         const dbUpdates = {};
         if (updates.name) dbUpdates.name = updates.name;
@@ -99,6 +102,7 @@ export async function updateMedicine(id, updates) {
 }
 
 export async function deleteMedicine(id) {
+    if (!supabase) return { success: false, error: 'Database connection not initialized' };
     try {
         const { error } = await supabase
             .from('medicines')
@@ -114,6 +118,7 @@ export async function deleteMedicine(id) {
 }
 
 export async function searchMedicines(query) {
+    if (!supabase) return { success: false, error: 'Database connection not initialized' };
     try {
         const { data, error } = await supabase
             .from('medicines')
@@ -153,6 +158,7 @@ export async function searchMedicines(query) {
 // ==========================================
 
 export async function getSuppliers() {
+    if (!supabase) return { success: false, error: 'Database connection not initialized' };
     try {
         const { data, error } = await supabase
             .from('suppliers')
@@ -177,6 +183,7 @@ export async function getSuppliers() {
 }
 
 export async function addSupplier(supplier) {
+    if (!supabase) return { success: false, error: 'Database connection not initialized' };
     try {
         const { data, error } = await supabase
             .from('suppliers')
@@ -199,6 +206,7 @@ export async function addSupplier(supplier) {
 // ==========================================
 
 export async function createSale(medicineId, quantity) {
+    if (!supabase) return { success: false, error: 'Database connection not initialized' };
     try {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) throw new Error('User not authenticated');
@@ -226,6 +234,7 @@ export async function createSale(medicineId, quantity) {
 }
 
 export async function createCustomSale(itemDetails) {
+    if (!supabase) return { success: false, error: 'Database connection not initialized' };
     try {
         const { data: { user } } = await supabase.auth.getUser();
 
@@ -256,6 +265,7 @@ export async function createCustomSale(itemDetails) {
 }
 
 export async function getSalesHistory() {
+    if (!supabase) return { success: false, error: 'Database connection not initialized' };
     try {
         const { data, error } = await supabase
             .from('sales')
@@ -280,6 +290,7 @@ export async function getSalesHistory() {
 }
 
 export async function getTodaysSales() {
+    if (!supabase) return { success: false, error: 'Database connection not initialized' };
     try {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
@@ -306,6 +317,7 @@ export async function getTodaysSales() {
 }
 
 export async function getSalesByDateRange(startDate, endDate) {
+    if (!supabase) return { success: false, error: 'Database connection not initialized' };
     try {
         const end = new Date(endDate);
         end.setHours(23, 59, 59, 999);
@@ -340,6 +352,7 @@ export async function getSalesByDateRange(startDate, endDate) {
 // ==========================================
 
 export async function getDashboardStats() {
+    if (!supabase) return { success: false, error: 'Database connection not initialized' };
     try {
         const [medicinesData, salesData] = await Promise.all([
             getAllMedicines(),
@@ -380,6 +393,7 @@ export async function getDashboardStats() {
 // ==========================================
 
 export async function addStockAdjustment(adjustment) {
+    if (!supabase) return { success: false, error: 'Database connection not initialized' };
     try {
         const { data: { user } } = await supabase.auth.getUser();
 

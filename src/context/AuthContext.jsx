@@ -92,7 +92,14 @@ export function AuthProvider({ children }) {
 
     return (
         <AuthContext.Provider value={{ user, profile, isAdmin, login, logout, loading }}>
-            {!loading && (
+            {loading ? (
+                <div className="min-h-screen flex items-center justify-center bg-slate-50">
+                    <div className="flex flex-col items-center gap-4">
+                        <div className="w-12 h-12 border-4 border-pharmacy-200 border-t-pharmacy-600 rounded-full animate-spin"></div>
+                        <p className="text-slate-500 font-medium">Initializing Application...</p>
+                    </div>
+                </div>
+            ) : (
                 (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) ? (
                     <div className="min-h-screen flex items-center justify-center bg-slate-100 p-4">
                         <div className="bg-white p-8 rounded-2xl shadow-xl max-w-md text-center">
@@ -106,8 +113,8 @@ export function AuthProvider({ children }) {
                                 The application is missing required environment variables.
                             </p>
                             <div className="text-left bg-slate-900 text-slate-300 p-4 rounded-lg text-xs font-mono mb-6 overflow-x-auto">
-                                <p>VITE_SUPABASE_URL</p>
-                                <p>VITE_SUPABASE_ANON_KEY</p>
+                                <p>VITE_SUPABASE_URL: {import.meta.env.VITE_SUPABASE_URL ? 'Set' : 'Missing'}</p>
+                                <p>VITE_SUPABASE_ANON_KEY: {import.meta.env.VITE_SUPABASE_ANON_KEY ? 'Set' : 'Missing'}</p>
                             </div>
                             <p className="text-sm text-slate-500">
                                 Please add these to your Vercel Project Settings.

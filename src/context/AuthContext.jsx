@@ -36,7 +36,6 @@ export function AuthProvider({ children }) {
                 // Race against timeout
                 const session = await Promise.race([authPromise(), timeoutPromise]);
 
-                setUser(session?.user ?? null);
                 if (session?.user) {
                     await fetchProfile(session.user.id);
                 } else {
@@ -44,7 +43,9 @@ export function AuthProvider({ children }) {
                 }
             } catch (e) {
                 console.error("Auth init error:", e);
-                setError(e.message || 'Failed to connect to database');
+                // Instead of blocking, we just assume no user/session
+                // showToast('Session check failed, please login', TOAST_TYPES.WARNING); // Optional: notify user
+                setUser(null);
                 setLoading(false);
             }
         };
@@ -104,13 +105,6 @@ export function AuthProvider({ children }) {
 
     const isAdmin = profile?.role === 'admin';
 
-    // Retry initialization
-    const retryInit = () => {
-        setLoading(true);
-        setError(null);
-        window.location.reload();
-    };
-
     return (
         <AuthContext.Provider value={{ user, profile, isAdmin, login, logout, loading }}>
             {loading ? (
@@ -118,24 +112,6 @@ export function AuthProvider({ children }) {
                     <div className="flex flex-col items-center gap-4">
                         <div className="w-12 h-12 border-4 border-pharmacy-200 border-t-pharmacy-600 rounded-full animate-spin"></div>
                         <p className="text-slate-500 font-medium">Initializing Application...</p>
-                    </div>
-                </div>
-            ) : error ? (
-                <div className="min-h-screen flex items-center justify-center bg-slate-100 p-4">
-                    <div className="bg-white p-8 rounded-2xl shadow-xl max-w-md text-center">
-                        <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                            </svg>
-                        </div>
-                        <h2 className="text-2xl font-bold text-slate-800 mb-2">Connection Failed</h2>
-                        <p className="text-slate-600 mb-6">{error}</p>
-                        <button
-                            onClick={retryInit}
-                            className="bg-pharmacy-600 text-white px-6 py-2 rounded-xl hover:bg-pharmacy-700 transition-colors"
-                        >
-                            Retry Connection
-                        </button>
                     </div>
                 </div>
             ) : (

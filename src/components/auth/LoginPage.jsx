@@ -16,11 +16,18 @@ export default function LoginPage() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
+        console.log("Attempting login with:", { email }); // Log email (don't log password)
         try {
-            await login(email, password);
+            const result = await login(email, password);
+            console.log("Login success:", result);
             showToast('Welcome back!', TOAST_TYPES.SUCCESS);
             navigate('/');
         } catch (error) {
+            console.error("Login failed:", error);
+            // Log the full error object to debug 400 details
+            if (error.message) console.log("Error message:", error.message);
+            if (error.code) console.log("Error code:", error.code);
+
             showToast(error.message || 'Login failed', TOAST_TYPES.ERROR);
         } finally {
             setIsSubmitting(false);

@@ -90,6 +90,38 @@ export default function LoginPage() {
                             'Sign In'
                         )}
                     </button>
+
+                    {/* Debug / Test Connection Section */}
+                    <div className="pt-4 border-t border-white/10">
+                        <button
+                            type="button"
+                            onClick={async () => {
+                                console.log("Testing Supabase Connection...");
+                                const start = Date.now();
+                                try {
+                                    // Try a simple health check or fetch
+                                    const { data, error } = await import('../../lib/supabase').then(m => m.supabase.from('medicines').select('count', { count: 'exact', head: true }));
+                                    const duration = Date.now() - start;
+                                    if (error) {
+                                        console.error("Connection Test Failed:", error);
+                                        alert(`Connection Failed: ${error.message} (${duration}ms)`);
+                                    } else {
+                                        console.log("Connection Test Success:", data);
+                                        alert(`Connection Successful! (${duration}ms)`);
+                                    }
+                                } catch (err) {
+                                    console.error("Connection Test Error:", err);
+                                    alert(`Connection Error: ${err.message}`);
+                                }
+                            }}
+                            className="text-xs text-pharmacy-300 hover:text-white underline w-full text-center"
+                        >
+                            Test Server Connection
+                        </button>
+                        <p className="text-[10px] text-center text-pharmacy-400 mt-2 font-mono">
+                            v1.0.2 | URL: {import.meta.env.VITE_SUPABASE_URL?.slice(0, 20)}...
+                        </p>
+                    </div>
                 </form>
             </div>
         </div>

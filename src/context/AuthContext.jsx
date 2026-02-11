@@ -21,20 +21,9 @@ export function AuthProvider({ children }) {
 
         const initAuth = async () => {
             try {
-                // Timeout promise
-                const timeoutPromise = new Promise((_, reject) =>
-                    setTimeout(() => reject(new Error('Connection timeout')), 5000)
-                );
+                const { data: { session }, error } = await supabase.auth.getSession();
 
-                // Auth check promise
-                const authPromise = async () => {
-                    const { data: { session }, error } = await supabase.auth.getSession();
-                    if (error) throw error;
-                    return session;
-                };
-
-                // Race against timeout
-                const session = await Promise.race([authPromise(), timeoutPromise]);
+                if (error) throw error;
 
                 if (session?.user) {
                     await fetchProfile(session.user.id);
@@ -43,8 +32,7 @@ export function AuthProvider({ children }) {
                 }
             } catch (e) {
                 console.error("Auth init error:", e);
-                // Instead of blocking, we just assume no user/session
-                // showToast('Session check failed, please login', TOAST_TYPES.WARNING); // Optional: notify user
+                // Fail open: allow login page to show even if init fails
                 setUser(null);
                 setLoading(false);
             }

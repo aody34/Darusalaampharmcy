@@ -87,6 +87,9 @@ export function AuthProvider({ children }) {
         if (error) {
             showToast('Error signing out', TOAST_TYPES.ERROR);
         } else {
+            // Clear the state immediately
+            setUser(null);
+            setProfile(null);
             showToast('Signed out successfully', TOAST_TYPES.SUCCESS);
         }
     };

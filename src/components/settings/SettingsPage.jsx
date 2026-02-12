@@ -2,7 +2,146 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { useApp, TOAST_TYPES } from '../../context/AppContext';
-import { User, Save, Shield, UserPlus } from 'lucide-react';
+import { User, Save, Shield, UserPlus, Mail, Lock } from 'lucide-react';
+
+// Staff Registration Form Component
+function StaffRegistrationForm({ showToast }) {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [fullName, setFullName] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const handleCreateStaff = async (e) => {
+        e.preventDefault();
+        setIsSubmitting(true);
+
+        try {
+            // First, signup the user (this creates auth record)
+            const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+                email,
+                password,
+                options: {
+                    emailRedirectTo: null, // No email verification needed
+                    data: {
+                        full_name: fullName
+                    }
+                }
+            });
+
+            if (signUpError) throw signUpError;
+
+            // Create profile manually
+            const { error: profileError } = await supabase
+                .from('profiles')
+                .insert([{
+                    id: signUpData.user.id,
+                    email: email,
+                    full_name: fullName,
+                    role: 'staff'
+                }]);
+
+            if (profileError) throw profileError;
+
+            showToast(`Staff member ${fullName} created successfully!`, TOAST_TYPES.SUCCESS);
+
+            // Reset form
+            setEmail('');
+            setPassword('');
+            setFullName('');
+        } catch (error) {
+            console.error('Error creating staff:', error);
+            showToast(error.message || 'Failed to create staff member', TOAST_TYPES.ERROR);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    return (
+        <form onSubmit={handleCreateStaff} className="space-y-5 max-w-xl">
+            {/* Full Name */}
+            <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Full Name
+                </label>
+                <div className="relative">
+                    <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                    <input
+                        type="text"
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
+                        className="w-full pl-12 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-pharmacy-500 focus:border-transparent outline-none transition-all"
+                        placeholder="John Doe"
+                        required
+                    />
+                </div>
+            </div>
+
+            {/* Email */}
+            <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Email Address
+                </label>
+                <div className="relative">
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                    <input
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="w-full pl-12 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-pharmacy-500 focus:border-transparent outline-none transition-all"
+                        placeholder="staff@darusalaam.com"
+                        required
+                    />
+                </div>
+            </div>
+
+            {/* Password */}
+            <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Password
+                </label>
+                <div className="relative">
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                    <input
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="w-full pl-12 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-pharmacy-500 focus:border-transparent outline-none transition-all"
+                        placeholder="••••••••"
+                        required
+                        minLength={6}
+                    />
+                </div>
+                <p className="mt-2 text-xs text-slate-500">Minimum 6 characters</p>
+            </div>
+
+            {/* Submit Button */}
+            <button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full bg-pharmacy-600 hover:bg-pharmacy-700 text-white font-semibold py-3 rounded-xl transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+                {isSubmitting ? (
+                    <>
+                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        Creating Staff...
+                    </>
+                ) : (
+                    <>
+                        <UserPlus className="w-5 h-5" />
+                        Create Staff Account
+                    </>
+                )}
+            </button>
+
+            {/* Info Box */}
+            <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl">
+                <p className="text-sm text-blue-800">
+                    <strong>Note:</strong> New staff members can access Dashboard, Medicines, and Point of Sale. Only admins can access Suppliers, Reports, and Settings.
+                </p>
+            </div>
+        </form>
+    );
+}
 
 export default function SettingsPage() {
     const { profile } = useAuth();
@@ -129,47 +268,17 @@ export default function SettingsPage() {
 
                     {activeTab === 'team' && (
                         <div className="space-y-6">
-                            <div className="flex items-center justify-between mb-6 pb-6 border-b border-slate-100">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
-                                        <User className="w-8 h-8 text-blue-600" />
-                                    </div>
-                                    <div>
-                                        <h2 className="text-xl font-bold text-slate-800">Team Management</h2>
-                                        <p className="text-sm text-slate-500">View and manage staff accounts</p>
-                                    </div>
+                            <div className="flex items-center gap-4 mb-6 pb-6 border-b border-slate-100">
+                                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
+                                    <UserPlus className="w-8 h-8 text-blue-600" />
                                 </div>
-                                <button
-                                    onClick={() => showToast('Invite users via Supabase Dashboard', TOAST_TYPES.WARNING)}
-                                    className="btn-primary flex items-center gap-2"
-                                >
-                                    <UserPlus className="w-5 h-5" />
-                                    Invite Staff
-                                </button>
-                            </div>
-
-                            <div className="space-y-4">
-                                <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-200">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 bg-pharmacy-500 rounded-full flex items-center justify-center text-white font-bold">
-                                            {profile?.full_name?.charAt(0) || 'U'}
-                                        </div>
-                                        <div>
-                                            <p className="font-bold text-slate-800">{profile?.full_name || 'Current User'}</p>
-                                            <p className="text-sm text-slate-500">{profile?.email}</p>
-                                        </div>
-                                    </div>
-                                    <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${profile?.role === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-green-100 text-green-700'
-                                        }`}>
-                                        {profile?.role || 'Staff'}
-                                    </span>
-                                </div>
-
-                                {/* Note: A real implementation would map over a list of users fetched from Supabase */}
-                                <div className="text-center py-8 text-slate-400 text-sm">
-                                    Manage additional users in the Supabase Authentication Dashboard
+                                <div>
+                                    <h2 className="text-xl font-bold text-slate-800">Register New Staff</h2>
+                                    <p className="text-sm text-slate-500">Create accounts for pharmacy staff members</p>
                                 </div>
                             </div>
+
+                            <StaffRegistrationForm showToast={showToast} />
                         </div>
                     )}
                 </div>
